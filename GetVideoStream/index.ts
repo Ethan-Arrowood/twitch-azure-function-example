@@ -2,7 +2,9 @@ import { AzureFunction, Context, HttpRequest } from "@azure/functions"
 import ValidationError from "ajv/dist/runtime/validation_error"
 import undici from 'undici'
 import { validators } from '../validation'
-import { ENV } from '../environment'
+import { getEnv } from '../environment'
+
+const ENV = getEnv()
 
 async function authenticate () {
     const url = new URL('https://id.twitch.tv/oauth2/token')
@@ -36,16 +38,15 @@ async function getGame (accessToken: string, game = 'minecraft') {
     const data = await response.body.json()
 
     if (validators.twitch.helix.games.response(data)) {
-        console.log(data)
         return data.data[0].id
     } else {
         throw new ValidationError(validators.twitch.helix.games.response.errors!)
     }
 }
 
-async function getRandomStream (accessToken: string, game: string) {
+async function getRandomStream (accessToken: string, gameId: string) {
     const url = new URL('https://api.twitch.tv/helix/streams')
-    url.searchParams.append('game_id', game)
+    url.searchParams.append('game_id', gameId)
 
     const response = await undici.request(url, {
         method: 'GET',
@@ -68,14 +69,14 @@ async function getRandomStream (accessToken: string, game: string) {
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
     try {
         const accessToken = await authenticate()
-        const game = await getGame(accessToken, context.req?.query['game'])
-        const stream = await getRandomStream(accessToken, game)
+        const gameId = await getGame(accessToken, context.req?.query['game'])
+        const stream = await getRandomStream(accessToken, gameId)
         context.res = {
             status: 200,
             body: stream
         };
     } catch (error) {
-        console.error(error)
+        context.log.error(error)
         if (error instanceof ValidationError) {
             context.res = {
                 status: 500,

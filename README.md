@@ -9,6 +9,20 @@ TWITCH_CLIENT_ID
 TWITCH_CLIENT_SECRET
 ```
 
+When developing locally, define a `local.settings.json` file in the root of the function app
+
+```json
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "",
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "TWITCH_CLIENT_ID": "",
+    "TWITCH_CLIENT_SECRET": ""
+  }
+}
+```
+
 ## Examples
 
 > Response data has been replaced with fake values

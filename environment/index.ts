@@ -8,7 +8,7 @@ export function getEnvVar(variable: string): string {
   throw new Error(`Missing environment variable ${variable}`)
 }
 
-export const ENV = {
+export const getEnv = () => ({
   TWITCH_CLIENT_ID: getEnvVar('TWITCH_CLIENT_ID'),
   TWITCH_CLIENT_SECRET: getEnvVar('TWITCH_CLIENT_SECRET'),
-}
+})
